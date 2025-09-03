@@ -33,47 +33,78 @@ with tarfile.open(filename, "r:gz") as tar:
 
 for platform, cmake_options, platform_tuple in generators:
 
+    cmake_env = os.environ.copy()
+    cmake_env['CMAKE_POLICY_VERSION_MINIMUM'] = '3.5'
+
     os.makedirs(f'sundials-5.3.0/{platform}/static')
 
     # build CVode as static library
-    check_call([
-        'cmake',
-        '-D', 'BUILD_ARKODE=OFF',
-        '-D', 'BUILD_CVODES=OFF',
-        '-D', 'BUILD_IDA=OFF',
-        '-D', 'BUILD_IDAS=OFF',
-        '-D', 'BUILD_KINSOL=OFF',
-        '-D', 'BUILD_SHARED_LIBS=OFF',
-        '-D', f'CMAKE_INSTALL_PREFIX=sundials-5.3.0/{platform}/static/install',
-        '-D', 'CMAKE_USER_MAKE_RULES_OVERRIDE=../OverrideMSVCFlags.cmake',
-        '-D', 'EXAMPLES_ENABLE_C=OFF',
-        '-D', 'CMAKE_OSX_ARCHITECTURES=arm64;x86_64',
-        '-S', 'sundials-5.3.0',
-        '-B', f'sundials-5.3.0/{platform}/static'
-    ] + cmake_options)
+    check_call(
+        [
+            'cmake',
+            '-D', 'BUILD_ARKODE=OFF',
+            '-D', 'BUILD_CVODES=OFF',
+            '-D', 'BUILD_IDA=OFF',
+            '-D', 'BUILD_IDAS=OFF',
+            '-D', 'BUILD_KINSOL=OFF',
+            '-D', 'BUILD_SHARED_LIBS=OFF',
+            '-D', f'CMAKE_INSTALL_PREFIX=sundials-5.3.0/{platform}/static/install',
+            '-D', 'CMAKE_USER_MAKE_RULES_OVERRIDE=../OverrideMSVCFlags.cmake',
+            '-D', 'EXAMPLES_ENABLE_C=OFF',
+            '-D', 'CMAKE_OSX_ARCHITECTURES=arm64;x86_64',
+            '-S', 'sundials-5.3.0',
+            '-B', f'sundials-5.3.0/{platform}/static'
+        ] + cmake_options,
+        env=cmake_env,
+    )
 
-    check_call(['cmake', '--build', f'sundials-5.3.0/{platform}/static', '--target', 'install', '--config', configuration])
+    check_call(
+        [
+            'cmake',
+            '--build',
+            f'sundials-5.3.0/{platform}/static',
+            '--target',
+            'install',
+            '--config',
+            configuration,
+        ],
+        env=cmake_env,
+    )
 
     os.makedirs(f'sundials-5.3.0/{platform}/dynamic')
 
     # build CVode as dynamic library
-    check_call([
-        'cmake',
-        '-D', 'BUILD_ARKODE=OFF',
-        '-D', 'BUILD_CVODES=OFF',
-        '-D', 'BUILD_IDA=OFF',
-        '-D', 'BUILD_IDAS=OFF',
-        '-D', 'BUILD_KINSOL=OFF',
-        '-D', 'BUILD_STATIC_LIBS=OFF',
-        '-D', 'EXAMPLES_ENABLE_C=OFF',
-        '-D', f'CMAKE_INSTALL_PREFIX=sundials-5.3.0/{platform}/dynamic/install',
-        '-D', 'CMAKE_USER_MAKE_RULES_OVERRIDE=../OverrideMSVCFlags.cmake',
-        '-D', 'CMAKE_OSX_ARCHITECTURES=arm64;x86_64',
-        '-S', 'sundials-5.3.0',
-        '-B', f'sundials-5.3.0/{platform}/dynamic'
-    ] + cmake_options)
+    check_call(
+        [
+            'cmake',
+            '-D', 'BUILD_ARKODE=OFF',
+            '-D', 'BUILD_CVODES=OFF',
+            '-D', 'BUILD_IDA=OFF',
+            '-D', 'BUILD_IDAS=OFF',
+            '-D', 'BUILD_KINSOL=OFF',
+            '-D', 'BUILD_STATIC_LIBS=OFF',
+            '-D', 'EXAMPLES_ENABLE_C=OFF',
+            '-D', f'CMAKE_INSTALL_PREFIX=sundials-5.3.0/{platform}/dynamic/install',
+            '-D', 'CMAKE_USER_MAKE_RULES_OVERRIDE=../OverrideMSVCFlags.cmake',
+            '-D', 'CMAKE_OSX_ARCHITECTURES=arm64;x86_64',
+            '-S', 'sundials-5.3.0',
+            '-B', f'sundials-5.3.0/{platform}/dynamic'
+        ] + cmake_options,
+        env=cmake_env,
+    )
 
-    check_call(['cmake', '--build', f'sundials-5.3.0/{platform}/dynamic', '--target', 'install', '--config', configuration])
+    check_call(
+        [
+            'cmake',
+            '--build',
+            f'sundials-5.3.0/{platform}/dynamic',
+            '--target',
+            'install',
+            '--config',
+            configuration,
+        ],
+        env=cmake_env,
+    )
 
     sundials_binary_dir = os.path.join('fmpy', 'sundials', platform_tuple)
 
