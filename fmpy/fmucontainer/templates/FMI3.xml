@@ -12,7 +12,7 @@
 
   <CoSimulation
     modelIdentifier="FMUContainer"
-    hasEventMode="true"
+    hasEventMode="false"
     />
 
 {% if system.unitDefinitions %}
