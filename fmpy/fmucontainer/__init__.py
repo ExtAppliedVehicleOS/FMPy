@@ -254,9 +254,13 @@ def create_fmu_container(configuration, output_filename):
         }
 
         if v.start is not None:
-            if v.type in ['Float64', 'Real']:
+            if v.type in ['Float32', 'Float64', 'Real']:
                 variable['start'] = float(v.start)
-            elif v.type in ['Int32', 'Integer', 'Enumeration']:
+            elif v.type in [
+                'Int8', 'UInt8', 'Int16', 'UInt16',
+                'Int32', 'UInt32', 'Int64', 'UInt64',
+                'Integer', 'Enumeration',
+            ]:
                 variable['start'] = int(v.start)
             elif v.type == 'Boolean':
                 if isinstance(v.start, str):

@@ -524,9 +524,10 @@ System* instantiateSystem(
             }
             break;
         case FMIMajorVersion3:
-            // TODO: Add support for some FMI3 options if necessary
-            //           (hasEventMode=false, mightReturnEarlyFromDoStep=true, etc.)
-            if (FMI3InstantiateCoSimulation(m, _guid, componentResourcesDir, visible, loggingOn, true, false, NULL, 0, NULL ) > FMIWarning) {
+            // eventModeUsed=false so components enter step mode directly
+            // after exitInitializationMode, avoiding the need for
+            // enterStepMode before doStep.
+            if (FMI3InstantiateCoSimulation(m, _guid, componentResourcesDir, visible, loggingOn, false, false, NULL, 0, NULL ) > FMIWarning) {
                 return NULL;
             }
             break;
@@ -618,10 +619,34 @@ System* instantiateSystem(
                 FMIStatus status = FMIOK;
                 FMIInstance* m = s->components[ci]->instance;
 
-                // TODO: Unpack start values for other FMI3 types
                 switch (variableType) {
+                case FMIFloat32Type: {
+                    const fmi3Float32 value = (fmi3Float32)mpack_node_double(start);
+                    status = setVariable(m, variableType, &vr, &value);
+                    break;
+                }
                 case FMIRealType: {
                     const fmi3Float64 value = mpack_node_double(start);
+                    status = setVariable(m, variableType, &vr, &value);
+                    break;
+                }
+                case FMIInt8Type: {
+                    const fmi3Int8 value = (fmi3Int8)mpack_node_int(start);
+                    status = setVariable(m, variableType, &vr, &value);
+                    break;
+                }
+                case FMIUInt8Type: {
+                    const fmi3UInt8 value = (fmi3UInt8)mpack_node_uint(start);
+                    status = setVariable(m, variableType, &vr, &value);
+                    break;
+                }
+                case FMIInt16Type: {
+                    const fmi3Int16 value = (fmi3Int16)mpack_node_int(start);
+                    status = setVariable(m, variableType, &vr, &value);
+                    break;
+                }
+                case FMIUInt16Type: {
+                    const fmi3UInt16 value = (fmi3UInt16)mpack_node_uint(start);
                     status = setVariable(m, variableType, &vr, &value);
                     break;
                 }
@@ -630,8 +655,18 @@ System* instantiateSystem(
                     status = setVariable(m, variableType, &vr, &value);
                     break;
                 }
+                case FMIUInt32Type: {
+                    const fmi3UInt32 value = (fmi3UInt32)mpack_node_uint(start);
+                    status = setVariable(m, variableType, &vr, &value);
+                    break;
+                }
                 case FMIInt64Type: {
                     const fmi3Int64 value = mpack_node_int(start);
+                    status = setVariable(m, variableType, &vr, &value);
+                    break;
+                }
+                case FMIUInt64Type: {
+                    const fmi3UInt64 value = mpack_node_u64(start);
                     status = setVariable(m, variableType, &vr, &value);
                     break;
                 }
@@ -647,8 +682,6 @@ System* instantiateSystem(
                     break;
                 }
                 default:
-                    // TODO: log this
-                    // logMessage(NULL, instanceName, fmi2Fatal, "logError", "Unknown type ID for variable index %d: %d.", j, variableType);
                     return NULL;
                     break;
                 }
