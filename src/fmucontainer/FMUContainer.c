@@ -141,7 +141,9 @@ static void logFMIMessage(FMIInstance *instance, FMIStatus status, const char *c
     free(buf);
 }
 
-static void logFunctionCall(FMIInstance *instance, FMIStatus status, const char *message, ...) {
+// Matches FMILogFunctionCall: FMI.c passes the call already formatted, so
+// message is copied verbatim rather than used as a format string.
+static void logFunctionCall(FMIInstance *instance, FMIStatus status, const char *message) {
 
     if (!instance) {
         return;
@@ -155,13 +157,7 @@ static void logFunctionCall(FMIInstance *instance, FMIStatus status, const char 
 
     char buf[FMI_MAX_MESSAGE_LENGTH] = "";
 
-    const size_t len = snprintf(buf, FMI_MAX_MESSAGE_LENGTH, "[%s] ", instance->name);
-
-    va_list args;
-
-    va_start(args, message);
-    vsnprintf(&buf[len], FMI_MAX_MESSAGE_LENGTH - len, message, args);
-    va_end(args);
+    snprintf(buf, FMI_MAX_MESSAGE_LENGTH, "[%s] %s", instance->name, message);
 
     switch (s->fmiMajorVersion) {
     case FMIMajorVersion2:
